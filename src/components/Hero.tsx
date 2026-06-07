@@ -8,6 +8,7 @@ const HERO_BACKGROUNDS = [
   `${import.meta.env.BASE_URL}kajiado_eco_village.png`,
   `${import.meta.env.BASE_URL}laikipia_grassland.png`,
   `${import.meta.env.BASE_URL}kilifi_mangrove.png`,
+  'https://ik.imagekit.io/36h5sgvlw/Screenshot%202026-06-07%20135517.png',
 ];
 
 export const Hero: React.FC = () => {

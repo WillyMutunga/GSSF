@@ -66,7 +66,7 @@ const GALLERY_DATA: GalleryImage[] = [
     title: 'Green Living Day',
     description: 'Tree Planting and community clean-up event in Emali, engaging local youth in hands-on climate action.',
     category: 'Reforestation',
-    url: `${import.meta.env.BASE_URL}kilifi_mangrove.png`,
+    url: 'https://ik.imagekit.io/36h5sgvlw/Screenshot%202026-06-07%20135517.png',
   },
 ];
 
