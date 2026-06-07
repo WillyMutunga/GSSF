@@ -3,7 +3,12 @@ import { Logo } from './Logo';
 import { Menu, X } from 'lucide-react';
 import { Button } from 'antd';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  currentView: 'home' | 'gallery';
+  onViewChange: (view: 'home' | 'gallery') => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -26,14 +31,32 @@ export const Navbar: React.FC = () => {
     { label: 'Our Initiatives', href: '#initiatives' },
     { label: 'Impact Hub', href: '#impact' },
     { label: 'Get Involved', href: '#get-involved' },
+    { label: 'Gallery', href: 'gallery' },
   ];
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    const targetElement = document.querySelector(href);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    if (href === 'gallery') {
+      onViewChange('gallery');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      if (currentView === 'gallery') {
+        onViewChange('home');
+        // Let state change propagate and elements mount
+        setTimeout(() => {
+          const targetElement = document.querySelector(href);
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 150);
+      } else {
+        const targetElement = document.querySelector(href);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
     }
   };
 
@@ -41,7 +64,7 @@ export const Navbar: React.FC = () => {
     <>
       <nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
+          isScrolled || currentView === 'gallery'
             ? 'bg-brand-alabaster/80 backdrop-blur-md border-b border-brand-cream/80 shadow-sm py-3'
             : 'bg-transparent py-5'
         }`}
@@ -49,23 +72,33 @@ export const Navbar: React.FC = () => {
         <div className="w-full px-6 md:px-12 lg:px-16 flex items-center justify-between">
           {/* Left: Brand Logo */}
           <a href="#home" onClick={(e) => handleLinkClick(e, '#home')} className="focus:outline-none">
-            <Logo variant="horizontal" light={!isScrolled} />
+            <Logo variant="horizontal" light={!isScrolled && currentView !== 'gallery'} />
           </a>
 
           {/* Center: Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={(e) => handleLinkClick(e, link.href)}
-                className={`text-sm font-semibold transition-all-300 font-sans tracking-wide relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-brand-green hover:after:w-full after:transition-all after:duration-300 ${
-                  isScrolled ? 'text-brand-dark/80 hover:text-brand-green' : 'text-white/90 hover:text-brand-gold'
-                }`}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = (currentView === 'gallery' && link.href === 'gallery') || 
+                               (currentView === 'home' && link.href === '#home' && !isScrolled);
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={(e) => handleLinkClick(e, link.href)}
+                  className={`text-sm font-semibold transition-all-300 font-sans tracking-wide relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:bg-brand-green hover:after:w-full after:transition-all after:duration-300 ${
+                    isActive ? 'after:w-full' : 'after:w-0'
+                  } ${
+                    isScrolled || currentView === 'gallery'
+                      ? isActive
+                        ? 'text-brand-green'
+                        : 'text-brand-dark/80 hover:text-brand-green'
+                      : 'text-white/90 hover:text-brand-gold'
+                  }`}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
           </div>
 
           {/* Right: CTA & Mobile Toggle */}
@@ -89,7 +122,9 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`p-2 rounded-xl transition-all-300 md:hidden focus:outline-none ${
-                isScrolled ? 'text-brand-dark hover:bg-brand-cream/50' : 'text-white hover:bg-white/10'
+                isScrolled || currentView === 'gallery' 
+                  ? 'text-brand-dark hover:bg-brand-cream/50' 
+                  : 'text-white hover:bg-white/10'
               }`}
               aria-label="Toggle mobile menu"
             >

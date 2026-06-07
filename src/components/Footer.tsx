@@ -3,7 +3,12 @@ import { Logo } from './Logo';
 import { Mail, Phone, MapPin, Send, Heart } from 'lucide-react';
 import { Input, Button, message } from 'antd';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  currentView: 'home' | 'gallery';
+  onViewChange: (view: 'home' | 'gallery') => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ currentView, onViewChange }) => {
   const [email, setEmail] = useState('');
 
   const handleSubscribe = (e: React.FormEvent) => {
@@ -18,9 +23,24 @@ export const Footer: React.FC = () => {
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (href === 'gallery') {
+      onViewChange('gallery');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      if (currentView === 'gallery') {
+        onViewChange('home');
+        setTimeout(() => {
+          const element = document.querySelector(href);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 150);
+      } else {
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
     }
   };
 
@@ -30,6 +50,7 @@ export const Footer: React.FC = () => {
     { label: 'Our Initiatives', href: '#initiatives' },
     { label: 'Impact Hub', href: '#impact' },
     { label: 'Get Involved', href: '#get-involved' },
+    { label: 'Gallery', href: 'gallery' },
   ];
 
   return (

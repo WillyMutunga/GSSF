@@ -1,12 +1,21 @@
+import { useState } from 'react';
 import { ConfigProvider } from 'antd';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { AboutVision } from './components/AboutVision';
 import { ImpactHub } from './components/ImpactHub';
 import { GetInvolved } from './components/GetInvolved';
+import { Gallery } from './components/Gallery';
 import { Footer } from './components/Footer';
 
 function App() {
+  const [currentView, setCurrentView] = useState<'home' | 'gallery'>('home');
+
+  const handleBackToHome = () => {
+    setCurrentView('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <ConfigProvider
       theme={{
@@ -30,25 +39,31 @@ function App() {
     >
       <div className="min-h-screen flex flex-col bg-brand-alabaster">
         {/* Sticky Header Navigation */}
-        <Navbar />
+        <Navbar currentView={currentView} onViewChange={setCurrentView} />
         
         {/* Main Content Sections */}
         <main className="flex-grow">
-          {/* Hero Landing */}
-          <Hero />
-          
-          {/* About Us & Vision Pillars */}
-          <AboutVision />
-          
-          {/* Impact Hub & Regional Projects */}
-          <ImpactHub />
-          
-          {/* Get Involved Campaign Form */}
-          <GetInvolved />
+          {currentView === 'home' ? (
+            <>
+              {/* Hero Landing */}
+              <Hero />
+              
+              {/* About Us & Vision Pillars */}
+              <AboutVision />
+              
+              {/* Impact Hub & Regional Projects */}
+              <ImpactHub />
+              
+              {/* Get Involved Campaign Form */}
+              <GetInvolved />
+            </>
+          ) : (
+            <Gallery onBackToHome={handleBackToHome} />
+          )}
         </main>
         
         {/* Footer Connections */}
-        <Footer />
+        <Footer currentView={currentView} onViewChange={setCurrentView} />
       </div>
     </ConfigProvider>
   );
