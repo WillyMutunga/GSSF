@@ -61,6 +61,13 @@ const GALLERY_DATA: GalleryImage[] = [
     category: 'Reforestation',
     url: `${import.meta.env.BASE_URL}kilifi_mangrove.png`,
   },
+  {
+    id: 'gssf-img-6',
+    title: 'Green Living Day',
+    description: 'Tree Planting and community clean-up event in Emali, engaging local youth in hands-on climate action.',
+    category: 'Reforestation',
+    url: `${import.meta.env.BASE_URL}kilifi_mangrove.png`,
+  },
 ];
 
 interface GalleryProps {
