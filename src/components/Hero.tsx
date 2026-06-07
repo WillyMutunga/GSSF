@@ -1,8 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, Leaf } from 'lucide-react';
 import { Button } from 'antd';
 
+const HERO_BACKGROUNDS = [
+  `${import.meta.env.BASE_URL}reforestation_kenya.png`,
+  `${import.meta.env.BASE_URL}mount_kenya_watershed.png`,
+  `${import.meta.env.BASE_URL}kajiado_eco_village.png`,
+  `${import.meta.env.BASE_URL}laikipia_grassland.png`,
+  `${import.meta.env.BASE_URL}kilifi_mangrove.png`,
+];
+
 export const Hero: React.FC = () => {
+  const [bgIndex, setBgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % HERO_BACKGROUNDS.length);
+    }, 6000); // Transition background image every 6 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   const handleScrollTo = (id: string) => {
     const element = document.querySelector(id);
     if (element) {
@@ -14,17 +31,26 @@ export const Hero: React.FC = () => {
     <section 
       id="home" 
       className="relative min-h-screen flex items-center bg-brand-dark overflow-hidden"
-      style={{
-        backgroundImage: `url(${import.meta.env.BASE_URL}reforestation_kenya.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
     >
+      {/* Background Slideshow Layers with Cross-Fade */}
+      {HERO_BACKGROUNDS.map((bgUrl, index) => (
+        <div
+          key={bgUrl}
+          className="absolute inset-0 transition-opacity duration-1000 ease-in-out z-0"
+          style={{
+            backgroundImage: `url(${bgUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: bgIndex === index ? 1 : 0,
+          }}
+        />
+      ))}
+
       {/* Dark overlay for contrast and readability (left-to-right gradient overlay) */}
-      <div className="absolute inset-0 bg-gradient-to-r from-brand-dark/95 via-brand-dark/80 to-brand-dark/40 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-dark/95 via-brand-dark/80 to-brand-dark/40 z-10" />
       
       {/* Ambient color accent glow */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-green/20 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-green/20 rounded-full blur-3xl pointer-events-none z-10" />
 
       {/* Organic transition flow to the next section */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-brand-alabaster to-transparent z-10 pointer-events-none" />
