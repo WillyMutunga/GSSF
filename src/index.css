@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand-green: #3B5A2B;
+  --color-brand-gold: #997D2F;
+  --color-brand-alabaster: #F9F8F6;
+  --color-brand-cream: #F4F1EA;
+  --color-brand-dark: #1A2416;
+  
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: Inter, "Plus Jakarta Sans", sans-serif;
+  
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+}
+
+@utility transition-all-300 {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@utility glass-nav {
+  background-color: rgba(249, 248, 246, 0.8);
+  backdrop-filter: blur(8px);
+  border-bottom-width: 1px;
+  border-color: rgba(244, 241, 234, 0.3);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  body {
+    @apply bg-brand-alabaster text-brand-dark font-sans antialiased selection:bg-brand-gold/30;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-brand-dark font-semibold tracking-tight;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-brand-cream;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-brand-green/30 rounded-full hover:bg-brand-green/50 transition-colors duration-300;
+}
