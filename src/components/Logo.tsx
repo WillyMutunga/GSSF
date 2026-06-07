@@ -23,7 +23,7 @@ export const Logo: React.FC<LogoProps> = ({
     return (
       <div className={`inline-flex items-center justify-center ${className}`}>
         <img
-          src="/logo_emblem.png"
+          src={`${import.meta.env.BASE_URL}logo_emblem.png`}
           alt="GSSF Emblem"
           style={{
             height: height !== 'auto' ? height : '64px',
@@ -40,7 +40,7 @@ export const Logo: React.FC<LogoProps> = ({
     return (
       <div className={`flex flex-col items-center text-center ${className}`}>
         <img
-          src="/logo_gssf.png"
+          src={`${import.meta.env.BASE_URL}logo_gssf.png`}
           alt="Green Settlement Schemes Foundation Logo"
           style={{
             height: height !== 'auto' ? height : 'auto',
@@ -57,7 +57,7 @@ export const Logo: React.FC<LogoProps> = ({
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <img
-        src="/logo_emblem.png"
+        src={`${import.meta.env.BASE_URL}logo_emblem.png`}
         alt="GSSF Emblem"
         style={{
           height: height !== 'auto' ? height : '44px',

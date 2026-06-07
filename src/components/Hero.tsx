@@ -15,7 +15,7 @@ export const Hero: React.FC = () => {
       id="home" 
       className="relative min-h-screen flex items-center bg-brand-dark overflow-hidden"
       style={{
-        backgroundImage: "url('/reforestation_kenya.png')",
+        backgroundImage: `url(${import.meta.env.BASE_URL}reforestation_kenya.png)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
