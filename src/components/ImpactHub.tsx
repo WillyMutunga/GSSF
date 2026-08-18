@@ -16,6 +16,24 @@ export interface Project {
 
 const PROJECTS: Project[] = [
   {
+  id: 'proj0',
+  title: 'Makueni Forest Canopy Restoration',
+  location: 'Ngwata Vocational Training Centre',
+  county: 'Makueni',
+  constituency: 'Kibwezi East',
+  treesPlanted: 1500,
+  description:
+  'At Ngwata Vocational Training Centre in Kibwezi East, this initiative is restoring native tree cover while engaging learners and the local community in practical environmental conservation. The project supports soil and water protection, strengthens climate resilience, and promotes long-term stewardship of Makueni’s natural resources.',
+  imageUrls: [
+    'https://ik.imagekit.io/36h5sgvlw/WhatsApp%20Image%202026-08-16%20at%2014.51.24%20(2).jpeg',
+    'https://ik.imagekit.io/36h5sgvlw/WhatsApp%20Image%202026-08-16%20at%2014.51.24.jpeg',
+    'https://ik.imagekit.io/36h5sgvlw/WhatsApp%20Image%202026-08-16%20at%2014.51.22.jpeg',
+    'https://ik.imagekit.io/36h5sgvlw/WhatsApp%20Image%202026-08-16%20at%2014.51.22%20(1).jpeg',
+  ],
+  year: 2024,
+  status: 'active',
+}
+  {
     id: 'proj1',
     title: 'Makueni Forest Canopy Restoration',
     location: 'Kibwezi Forest',
