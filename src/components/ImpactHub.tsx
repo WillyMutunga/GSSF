@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Trees, Calendar } from 'lucide-react';
 import { Card, Badge } from 'antd';
 
@@ -81,6 +81,137 @@ const PROJECTS: Project[] = [
   },
 ];
 
+interface ProjectCardProps {
+  project: Project;
+  hoveredCard: string | null;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}
+
+const ProjectCard: React.FC<ProjectCardProps> = ({ 
+  project, 
+  hoveredCard, 
+  onMouseEnter, 
+  onMouseLeave 
+}) => {
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  useEffect(() => {
+    if (!project.imageUrls || project.imageUrls.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentImgIndex((prev) => (prev + 1) % project.imageUrls!.length);
+    }, 5000); // Rotate slide every 5 seconds
+    return () => clearInterval(interval);
+  }, [project.imageUrls]);
+
+  const hasMultipleImages = project.imageUrls && project.imageUrls.length > 0;
+
+  return (
+    <Card
+      className="overflow-hidden border border-brand-cream/60 rounded-2xl bg-brand-alabaster shadow-sm hover:shadow-xl transition-all duration-300 transform"
+      style={{ padding: 0 }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      bodyStyle={{ padding: 0 }}
+    >
+      <div className="flex flex-col sm:flex-row h-full">
+        
+        {/* Card Image Column */}
+        <div className="sm:w-2/5 relative aspect-square sm:aspect-auto min-h-[200px] overflow-hidden bg-brand-cream flex-shrink-0">
+          {hasMultipleImages ? (
+            project.imageUrls!.map((url, idx) => (
+              <img
+                key={url}
+                src={url}
+                alt={`${project.title} - ${idx + 1}`}
+                className={`absolute inset-0 w-full h-full object-cover transform transition-all duration-1000 ${
+                  hoveredCard === project.id ? 'scale-105' : 'scale-100'
+                }`}
+                style={{
+                  opacity: currentImgIndex === idx ? 1 : 0,
+                  pointerEvents: currentImgIndex === idx ? 'auto' : 'none'
+                }}
+              />
+            ))
+          ) : (
+            <img
+              src={project.imageUrl}
+              alt={project.title}
+              className={`w-full h-full object-cover transform transition-transform duration-700 ${
+                hoveredCard === project.id ? 'scale-105' : 'scale-100'
+              }`}
+            />
+          )}
+
+          {/* Slideshow Dot Indicators overlay */}
+          {hasMultipleImages && project.imageUrls!.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 bg-black/40 backdrop-blur-sm px-3 py-2 rounded-full">
+              {project.imageUrls!.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImgIndex(idx);
+                  }}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 focus:outline-none ${
+                    currentImgIndex === idx ? 'bg-brand-gold w-3' : 'bg-white/60 hover:bg-white'
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Status Tag overlay */}
+          <div className="absolute top-4 left-4 z-10">
+            <Badge
+              status={project.status === 'active' ? 'processing' : 'success'}
+              text={project.status === 'active' ? 'Active' : 'Completed'}
+              className="px-2.5 py-1 rounded bg-brand-alabaster/95 backdrop-blur-sm text-xs font-sans font-bold uppercase tracking-wider border border-brand-cream/50"
+            />
+          </div>
+        </div>
+
+        {/* Card Text Column */}
+        <div className="sm:w-3/5 p-6 flex flex-col justify-between text-left space-y-4">
+          <div className="space-y-2">
+            {/* Location Info */}
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-brand-gold font-sans uppercase tracking-wider">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>{project.location}{project.constituency ? `, ${project.constituency}` : ''}, {project.county}</span>
+            </div>
+
+            {/* Project Title */}
+            <h3 className="text-lg font-serif font-bold text-brand-dark leading-snug hover:text-brand-green transition-colors">
+              {project.title}
+            </h3>
+
+            {/* Short Description */}
+            <p className="text-xs sm:text-sm text-slate-500 font-sans leading-relaxed line-clamp-3">
+              {project.description}
+            </p>
+          </div>
+
+          {/* Card Bottom Meta Data */}
+          <div className="flex items-center justify-between pt-4 border-t border-brand-cream/60">
+            <div className="flex items-center gap-1.5 text-brand-green font-semibold">
+              <Trees className="w-4 h-4" />
+              <span className="text-xs sm:text-sm font-sans font-bold">{project.treesPlanted.toLocaleString()} Trees</span>
+            </div>
+            
+            <div className="flex items-center gap-1 text-slate-400 font-semibold">
+              <Calendar className="w-3.5 h-3.5" />
+              <span className="text-xs font-sans">{project.year}</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </Card>
+  );
+};
+
 export const ImpactHub: React.FC = () => {
   const [selectedCounty, setSelectedCounty] = useState<string>('all');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -148,72 +279,13 @@ export const ImpactHub: React.FC = () => {
         {/* Grid of Projects */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
           {filteredProjects.map((project) => (
-            <Card
+            <ProjectCard
               key={project.id}
-              className="overflow-hidden border border-brand-cream/60 rounded-2xl bg-brand-alabaster shadow-sm hover:shadow-xl transition-all duration-300 transform"
-              style={{ padding: 0 }}
+              project={project}
+              hoveredCard={hoveredCard}
               onMouseEnter={() => setHoveredCard(project.id)}
               onMouseLeave={() => setHoveredCard(null)}
-              bodyStyle={{ padding: 0 }}
-            >
-              <div className="flex flex-col sm:flex-row h-full">
-                
-                {/* Card Image Column */}
-                <div className="sm:w-2/5 relative aspect-square sm:aspect-auto min-h-[200px] overflow-hidden bg-brand-cream">
-                  <img
-                    src={project.imageUrls && project.imageUrls.length > 0 ? project.imageUrls[0] : project.imageUrl}
-                    alt={project.title}
-                    className={`w-full h-full object-cover transform transition-transform duration-700 ${
-                      hoveredCard === project.id ? 'scale-105' : 'scale-100'
-                    }`}
-                  />
-                  {/* Status Tag overlay */}
-                  <div className="absolute top-4 left-4">
-                    <Badge
-                      status={project.status === 'active' ? 'processing' : 'success'}
-                      text={project.status === 'active' ? 'Active' : 'Completed'}
-                      className="px-2.5 py-1 rounded bg-brand-alabaster/95 backdrop-blur-sm text-xs font-sans font-bold uppercase tracking-wider border border-brand-cream/50"
-                    />
-                  </div>
-                </div>
-
-                {/* Card Text Column */}
-                <div className="sm:w-3/5 p-6 flex flex-col justify-between text-left space-y-4">
-                  <div className="space-y-2">
-                    {/* Location Info */}
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-brand-gold font-sans uppercase tracking-wider">
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>{project.location}{project.constituency ? `, ${project.constituency}` : ''}, {project.county}</span>
-                    </div>
-
-                    {/* Project Title */}
-                    <h3 className="text-lg font-serif font-bold text-brand-dark leading-snug hover:text-brand-green transition-colors">
-                      {project.title}
-                    </h3>
-
-                    {/* Short Description */}
-                    <p className="text-xs sm:text-sm text-slate-500 font-sans leading-relaxed line-clamp-3">
-                      {project.description}
-                    </p>
-                  </div>
-
-                  {/* Card Bottom Meta Data */}
-                  <div className="flex items-center justify-between pt-4 border-t border-brand-cream/60">
-                    <div className="flex items-center gap-1.5 text-brand-green font-semibold">
-                      <Trees className="w-4 h-4" />
-                      <span className="text-xs sm:text-sm font-sans font-bold">{project.treesPlanted.toLocaleString()} Trees</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 text-slate-400 font-semibold">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span className="text-xs font-sans">{project.year}</span>
-                    </div>
-                  </div>
-
-                </div>
-
-              </div>
-            </Card>
+            />
           ))}
         </div>
 
