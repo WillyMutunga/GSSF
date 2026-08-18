@@ -7,9 +7,11 @@ export interface Project {
   title: string;
   location: string;
   county: string;
+  constituency?: string;
   treesPlanted: number;
   description: string;
-  imageUrl: string;
+  imageUrl?: string;
+  imageUrls?: string[];
   year: number;
   status: 'active' | 'completed';
 }
@@ -32,7 +34,7 @@ const PROJECTS: Project[] = [
   ],
   year: 2024,
   status: 'active',
-}
+},
   {
     id: 'proj1',
     title: 'Makueni Forest Canopy Restoration',
@@ -159,7 +161,7 @@ export const ImpactHub: React.FC = () => {
                 {/* Card Image Column */}
                 <div className="sm:w-2/5 relative aspect-square sm:aspect-auto min-h-[200px] overflow-hidden bg-brand-cream">
                   <img
-                    src={project.imageUrl}
+                    src={project.imageUrls && project.imageUrls.length > 0 ? project.imageUrls[0] : project.imageUrl}
                     alt={project.title}
                     className={`w-full h-full object-cover transform transition-transform duration-700 ${
                       hoveredCard === project.id ? 'scale-105' : 'scale-100'
@@ -181,7 +183,7 @@ export const ImpactHub: React.FC = () => {
                     {/* Location Info */}
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-brand-gold font-sans uppercase tracking-wider">
                       <MapPin className="w-3.5 h-3.5" />
-                      <span>{project.location}, {project.county}</span>
+                      <span>{project.location}{project.constituency ? `, ${project.constituency}` : ''}, {project.county}</span>
                     </div>
 
                     {/* Project Title */}
