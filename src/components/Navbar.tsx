@@ -4,8 +4,8 @@ import { Menu, X } from 'lucide-react';
 import { Button } from 'antd';
 
 interface NavbarProps {
-  currentView: 'home' | 'gallery';
-  onViewChange: (view: 'home' | 'gallery') => void;
+  currentView: 'home' | 'gallery' | 'blog';
+  onViewChange: (view: 'home' | 'gallery' | 'blog') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => {
@@ -30,6 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => 
     { label: 'About Us', href: '#about' },
     { label: 'Our Initiatives', href: '#initiatives' },
     { label: 'Impact Hub', href: '#impact' },
+    { label: 'Blog', href: 'blog' },
     { label: 'Get Involved', href: '#get-involved' },
     { label: 'Gallery', href: 'gallery' },
   ];
@@ -41,8 +42,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => 
     if (href === 'gallery') {
       onViewChange('gallery');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (href === 'blog') {
+      onViewChange('blog');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      if (currentView === 'gallery') {
+      if (currentView === 'gallery' || currentView === 'blog') {
         onViewChange('home');
         // Let state change propagate and elements mount
         setTimeout(() => {
@@ -64,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => 
     <>
       <nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled || currentView === 'gallery'
+          isScrolled || currentView !== 'home'
             ? 'bg-brand-alabaster/80 backdrop-blur-md border-b border-brand-cream/80 shadow-sm py-3'
             : 'bg-transparent py-5'
         }`}
@@ -72,13 +76,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => 
         <div className="w-full px-6 md:px-12 lg:px-16 flex items-center justify-between">
           {/* Left: Brand Logo */}
           <a href="#home" onClick={(e) => handleLinkClick(e, '#home')} className="focus:outline-none">
-            <Logo variant="horizontal" light={!isScrolled && currentView !== 'gallery'} />
+            <Logo variant="horizontal" light={!isScrolled && currentView === 'home'} />
           </a>
 
           {/* Center: Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => {
               const isActive = (currentView === 'gallery' && link.href === 'gallery') || 
+                               (currentView === 'blog' && link.href === 'blog') ||
                                (currentView === 'home' && link.href === '#home' && !isScrolled);
               return (
                 <a
@@ -88,7 +93,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => 
                   className={`text-sm font-semibold transition-all-300 font-sans tracking-wide relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:bg-brand-green hover:after:w-full after:transition-all after:duration-300 ${
                     isActive ? 'after:w-full' : 'after:w-0'
                   } ${
-                    isScrolled || currentView === 'gallery'
+                    isScrolled || currentView !== 'home'
                       ? isActive
                         ? 'text-brand-green'
                         : 'text-brand-dark/80 hover:text-brand-green'
@@ -122,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onViewChange }) => 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`p-2 rounded-xl transition-all-300 md:hidden focus:outline-none ${
-                isScrolled || currentView === 'gallery' 
+                isScrolled || currentView !== 'home' 
                   ? 'text-brand-dark hover:bg-brand-cream/50' 
                   : 'text-white hover:bg-white/10'
               }`}

@@ -1,24 +1,40 @@
 import React, { useState } from 'react';
 import { Logo } from './Logo';
-import { Mail, Phone, MapPin, Send, Heart } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Heart, Leaf } from 'lucide-react';
 import { Input, Button, message } from 'antd';
 
 interface FooterProps {
-  currentView: 'home' | 'gallery';
-  onViewChange: (view: 'home' | 'gallery') => void;
+  currentView: 'home' | 'gallery' | 'blog';
+  onViewChange: (view: 'home' | 'gallery' | 'blog') => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ currentView, onViewChange }) => {
   const [email, setEmail] = useState('');
+  const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
+    
+    // Basic email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       message.error('Please enter a valid email address.');
       return;
     }
-    message.success('Thank you for subscribing to the GSSF Newsletter!');
-    setEmail('');
+
+    setSubscribeStatus('loading');
+    
+    // Simulate network latency for premium feel
+    setTimeout(() => {
+      setSubscribeStatus('success');
+      message.success('Thank you for subscribing to the GSSF Newsletter!');
+      setEmail('');
+      
+      // Return to idle state after showing confirmation
+      setTimeout(() => {
+        setSubscribeStatus('idle');
+      }, 4000);
+    }, 1200);
   };
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -26,8 +42,11 @@ export const Footer: React.FC<FooterProps> = ({ currentView, onViewChange }) => 
     if (href === 'gallery') {
       onViewChange('gallery');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (href === 'blog') {
+      onViewChange('blog');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      if (currentView === 'gallery') {
+      if (currentView === 'gallery' || currentView === 'blog') {
         onViewChange('home');
         setTimeout(() => {
           const element = document.querySelector(href);
@@ -49,6 +68,7 @@ export const Footer: React.FC<FooterProps> = ({ currentView, onViewChange }) => 
     { label: 'About Us', href: '#about' },
     { label: 'Our Initiatives', href: '#initiatives' },
     { label: 'Impact Hub', href: '#impact' },
+    { label: 'Blog', href: 'blog' },
     { label: 'Get Involved', href: '#get-involved' },
     { label: 'Gallery', href: 'gallery' },
   ];
@@ -116,7 +136,7 @@ export const Footer: React.FC<FooterProps> = ({ currentView, onViewChange }) => 
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-brand-gold flex-shrink-0" />
                 <span className="text-sm text-slate-300 font-sans hover:text-white transition-all-300">
-                  <a href="mailto:info@gssf.or.ke">info@gssf.or.ke</a>
+                  <a href="mailto:wsharks003@gmail.com">wsharks003@gmail.com</a>
                 </span>
               </li>
             </ul>
@@ -129,25 +149,34 @@ export const Footer: React.FC<FooterProps> = ({ currentView, onViewChange }) => 
               Subscribe to receive updates on tree-planting events, settlement designs, and climate action.
             </p>
             
-            <form onSubmit={handleSubscribe} className="space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  type="email"
-                  placeholder="Your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 hover:bg-white/15 focus:bg-white/20 border-white/20 text-white placeholder-slate-400 rounded-xl py-2 font-sans focus:outline-none"
-                  style={{ borderRadius: '12px' }}
-                />
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<Send className="w-4 h-4" />}
-                  className="bg-brand-gold hover:bg-brand-gold/90 border-none rounded-xl flex items-center justify-center p-3"
-                  style={{ backgroundColor: '#997D2F', borderRadius: '12px' }}
-                />
+            {subscribeStatus === 'success' ? (
+              <div className="p-3.5 rounded-xl border border-brand-green/30 bg-brand-green/10 text-brand-gold font-semibold text-xs text-center flex items-center justify-center gap-2 animate-pulse">
+                <Leaf className="w-4 h-4 text-brand-gold" />
+                <span>Subscribed! Thank you.</span>
               </div>
-            </form>
+            ) : (
+              <form onSubmit={handleSubscribe} className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="Your email address"
+                    value={email}
+                    disabled={subscribeStatus === 'loading'}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="bg-white/10 hover:bg-white/15 focus:bg-white/20 border-white/20 text-white placeholder-slate-400 rounded-xl py-2 font-sans focus:outline-none"
+                    style={{ borderRadius: '12px' }}
+                  />
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={subscribeStatus === 'loading'}
+                    icon={subscribeStatus === 'loading' ? null : <Send className="w-4 h-4" />}
+                    className="bg-brand-gold hover:bg-brand-gold/90 border-none rounded-xl flex items-center justify-center p-3"
+                    style={{ backgroundColor: '#997D2F', borderRadius: '12px' }}
+                  />
+                </div>
+              </form>
+            )}
           </div>
 
         </div>

@@ -6,10 +6,11 @@ import { AboutVision } from './components/AboutVision';
 import { ImpactHub } from './components/ImpactHub';
 import { GetInvolved } from './components/GetInvolved';
 import { Gallery } from './components/Gallery';
+import { Blog } from './components/Blog';
 import { Footer } from './components/Footer';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'gallery'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'gallery' | 'blog'>('home');
 
   const handleBackToHome = () => {
     setCurrentView('home');
@@ -57,8 +58,10 @@ function App() {
               {/* Get Involved Campaign Form */}
               <GetInvolved />
             </>
-          ) : (
+          ) : currentView === 'gallery' ? (
             <Gallery onBackToHome={handleBackToHome} />
+          ) : (
+            <Blog onBackToHome={handleBackToHome} />
           )}
         </main>
         
