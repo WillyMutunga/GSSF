@@ -14,29 +14,29 @@ const COUNTIES: CountyData[] = [
     name: 'Makueni',
     projects: 'Forest Canopy Restoration',
     trees: '10,000+',
-    x: 270,
-    y: 360,
+    x: 250,
+    y: 375,
   },
   {
     name: 'Kajiado',
     projects: 'Eco-Village Housing Scheme',
     trees: '2,200+',
-    x: 210,
-    y: 370,
+    x: 195,
+    y: 380,
   },
   {
     name: 'Kitui',
     projects: 'River Basin Conservation Drive',
-    trees: '300',
-    x: 300,
-    y: 290,
+    trees: '5,000+',
+    x: 290,
+    y: 310,
   },
   {
     name: 'Machakos',
     projects: 'Grassland Agroforestry Corridor',
-    trees: '4,300+',
-    x: 240,
-    y: 300,
+    trees: '220',
+    x: 220,
+    y: 315,
   },
 ];
 
@@ -59,7 +59,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({ onSelectCounty }
     <div className="bg-white border border-brand-cream/65 rounded-3xl p-6 md:p-10 shadow-sm flex flex-col lg:flex-row items-center gap-12 mb-16">
       
       {/* Map Content Column */}
-      <div className="w-full lg:w-[45%] relative flex justify-center bg-brand-cream/15 rounded-3xl p-6 border border-brand-cream/40">
+      <div className="w-full lg:w-[45%] relative flex justify-center bg-brand-cream/15 rounded-3xl p-6 border border-brand-cream/40 overflow-hidden">
         
         {/* SVG Kenya Silhouette Map */}
         <svg
@@ -71,33 +71,72 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({ onSelectCounty }
           <defs>
             {/* Soft Shadow for Map Outline */}
             <filter id="map-shadow" x="-10%" y="-10%" width="130%" height="130%">
-              <feDropShadow dx="3" dy="6" stdDeviation="5" floodColor="#3B5A2B" floodOpacity="0.08" />
+              <feDropShadow dx="3" dy="6" stdDeviation="5" floodColor="#1E4620" floodOpacity="0.06" />
             </filter>
-            {/* Map Gradient */}
-            <linearGradient id="map-grad" x1="190" y1="40" x2="330" y2="440" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#EAF0E8" />
-              <stop offset="100%" stopColor="#D9E4D6" />
-            </linearGradient>
+            
+            {/* Heatmap Radial Gradient */}
+            <radialGradient id="heatmap-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#FF6B35" stopOpacity="0.95" />
+              <stop offset="25%" stopColor="#FFB13D" stopOpacity="0.7" />
+              <stop offset="65%" stopColor="#3B5A2B" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#3B5A2B" stopOpacity="0" />
+            </radialGradient>
           </defs>
 
-          {/* Stylized Detailed Kenya Outline */}
+          {/* Background Map: Outlying Kenya Shape */}
           <path
             d="M 190 40 L 385 40 L 385 110 L 435 240 L 360 380 L 325 435 L 290 445 L 265 445 L 205 435 L 180 405 L 155 405 L 115 340 L 125 285 L 105 245 L 125 185 L 155 125 Z"
-            fill="url(#map-grad)"
-            stroke="#BDCDB9"
-            strokeWidth="3.5"
+            fill="#F2F4F0"
+            stroke="#D3DDD0"
+            strokeWidth="2.5"
             strokeLinejoin="round"
             filter="url(#map-shadow)"
-            className="transition-all duration-500"
           />
-          
-          {/* Subtle Grid Lines inside Map Area */}
+
+          {/* ==================== COUNTY BORDER PATHS (REAL ADM LINES) ==================== */}
+
+          {/* Kajiado County (Southwest border wedge) */}
           <path
-            d="M 150 100 L 380 330 M 150 200 L 420 200 M 120 300 L 350 300 M 200 80 L 200 420 M 300 80 L 300 420"
+            d="M 175 338 L 220 338 L 225 385 L 230 405 L 205 435 L 180 405 L 155 405 Z"
+            fill="#E5EFE2"
             stroke="#BDCDB9"
-            strokeWidth="0.5"
-            strokeDasharray="4 6"
-            className="opacity-60"
+            strokeWidth="1.5"
+            className="transition-colors duration-300 hover:fill-brand-green/10"
+          />
+
+          {/* Makueni County (Elongated vertical county south of Machakos) */}
+          <path
+            d="M 220 338 L 255 338 L 285 380 L 280 405 L 230 405 L 225 385 Z"
+            fill="#E5EFE2"
+            stroke="#BDCDB9"
+            strokeWidth="1.5"
+            className="transition-colors duration-300 hover:fill-brand-green/10"
+          />
+
+          {/* Machakos County (Central-South, north of Kajiado/Makueni) */}
+          <path
+            d="M 175 338 L 220 338 L 255 338 L 250 288 L 195 293 Z"
+            fill="#E5EFE2"
+            stroke="#BDCDB9"
+            strokeWidth="1.5"
+            className="transition-colors duration-300 hover:fill-brand-green/10"
+          />
+
+          {/* Kitui County (Massive vertical east wedge) */}
+          <path
+            d="M 255 338 L 285 380 L 335 340 L 320 250 L 250 288 Z"
+            fill="#E5EFE2"
+            stroke="#BDCDB9"
+            strokeWidth="1.5"
+            className="transition-colors duration-300 hover:fill-brand-green/10"
+          />
+
+          {/* Rest of Kenya gridlines for authentic map look */}
+          <path
+            d="M 125 185 L 195 293 M 155 125 L 250 288 M 190 40 L 250 288 M 385 110 L 320 250 M 435 240 L 335 340"
+            stroke="#D3DDD0"
+            strokeWidth="1"
+            strokeDasharray="2 3"
           />
 
           {/* Lake Victoria Accent on West */}
@@ -107,48 +146,50 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({ onSelectCounty }
             stroke="#A3B4C5"
             strokeWidth="1"
           />
-          <text x="75" y="342" fill="#8796A5" className="text-[9px] font-sans font-bold select-none opacity-85">
+          <text x="70" y="342" fill="#8796A5" className="text-[9px] font-sans font-bold select-none opacity-85">
             L. Victoria
           </text>
 
-          {/* Nairobi Capital Star Landmark */}
-          <g transform="translate(220, 310)" className="opacity-80 select-none">
-            <circle cx="0" cy="0" r="8" className="fill-brand-gold/25 stroke-brand-gold/40" />
-            <circle cx="0" cy="0" r="3" className="fill-brand-gold" />
+          {/* Nairobi Capital Landmark */}
+          <g transform="translate(210, 310)" className="opacity-85 select-none">
+            <circle cx="0" cy="0" r="3" className="fill-slate-600" />
             <text x="8" y="3" fill="#697565" className="text-[9px] font-sans font-bold">Nairobi</text>
           </g>
 
-          {/* Interactive County Pins */}
+          {/* ==================== HEATMAP RIPPLE EFFECTS ==================== */}
           {COUNTIES.map((county) => (
             <g
               key={county.name}
-              className="cursor-pointer group"
+              className="cursor-pointer"
               onMouseEnter={() => setActiveCounty(county)}
               onMouseLeave={() => setActiveCounty(null)}
               onClick={() => handleCountyClick(county.name)}
             >
-              {/* Outer pulsing ripple */}
+              {/* Outer heat dispersion wave */}
               <circle
                 cx={county.x}
                 cy={county.y}
-                r="18"
-                className="fill-brand-green/10 stroke-brand-green/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"
-              />
-              
-              {/* Core Pulse Ring */}
-              <circle
-                cx={county.x}
-                cy={county.y}
-                r="7"
-                className="fill-brand-gold/30 stroke-brand-gold/60 animate-ping opacity-85"
+                r="45"
+                fill="url(#heatmap-glow)"
+                className="opacity-45 animate-pulse"
+                style={{ transformOrigin: `${county.x}px ${county.y}px` }}
               />
 
-              {/* Pin Center */}
+              {/* Middle intense heat circle */}
+              <circle
+                cx={county.x}
+                cy={county.y}
+                r="25"
+                fill="url(#heatmap-glow)"
+                className="opacity-80 transition-transform duration-500 transform group-hover:scale-110"
+              />
+
+              {/* Hot core node */}
               <circle
                 cx={county.x}
                 cy={county.y}
                 r="5.5"
-                className="fill-brand-green stroke-white stroke-[2] transition-transform duration-300 transform group-hover:scale-125 shadow-sm"
+                className="fill-white stroke-brand-gold stroke-[2.5] shadow-md"
               />
             </g>
           ))}
@@ -160,7 +201,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({ onSelectCounty }
             className="absolute z-20 bg-brand-dark/95 backdrop-blur-md text-white p-4 rounded-2xl shadow-xl border border-white/15 w-[230px] transition-all duration-300 font-sans pointer-events-none"
             style={{
               left: `${(activeCounty.x / 500) * 100}%`,
-              top: `${(activeCounty.y / 500) * 100 - 24}%`,
+              top: `${(activeCounty.y / 500) * 100 - 32}%`,
               transform: 'translate(-50%, -100%)',
             }}
           >
