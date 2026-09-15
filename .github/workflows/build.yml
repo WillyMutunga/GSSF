@@ -1,0 +1,48 @@
+name: Build & Package GSSF Website
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build Production Bundle (Vite & TypeScript)
+      run: npm run build
+
+    - name: Create Linux-Compatible Deployment Archive
+      run: |
+        cd dist
+        zip -r ../gssf_build.zip .
+        cd ..
+
+    - name: Upload Deployment Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: gssf-production-build
+        path: dist/
+        retention-days: 30
+
+    - name: Upload ZIP Package Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: gssf_build_zip
+        path: gssf_build.zip
+        retention-days: 30
