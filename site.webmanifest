@@ -1,0 +1,21 @@
+{
+  "name": "Green Settlement Schemes Foundation",
+  "short_name": "GSSF Kenya",
+  "description": "Environmental Sustainability, Reforestation & Climate-Resilient Settlements in Kenya",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F9F8F6",
+  "theme_color": "#1E4620",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/logo_emblem.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

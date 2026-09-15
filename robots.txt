@@ -1,0 +1,9 @@
+# Robots.txt for Green Settlement Schemes Foundation (GSSF)
+# Website: https://gssf.or.ke/
+
+User-agent: *
+Allow: /
+Disallow: /assets/*.map
+
+# Sitemaps
+Sitemap: https://gssf.or.ke/sitemap.xml
