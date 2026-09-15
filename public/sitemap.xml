@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Home Landing Page -->
+  <url>
+    <loc>https://gssf.or.ke/</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://gssf.or.ke/gssf_banner.jpg</image:loc>
+      <image:title>Green Settlement Schemes Foundation Kenya</image:title>
+      <image:caption>Community Reforestation and Climate-Resilient Settlements in Kenya</image:caption>
+    </image:image>
+  </url>
+
+  <!-- About Us & Vision Section -->
+  <url>
+    <loc>https://gssf.or.ke/#about</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Initiatives & Pillars Section -->
+  <url>
+    <loc>https://gssf.or.ke/#initiatives</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Impact Hub & Interactive Map Section -->
+  <url>
+    <loc>https://gssf.or.ke/#impact</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Get Involved & Volunteer Section -->
+  <url>
+    <loc>https://gssf.or.ke/#get-involved</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Success Stories & News Blog -->
+  <url>
+    <loc>https://gssf.or.ke/?view=blog</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Photo Gallery & Slideshow -->
+  <url>
+    <loc>https://gssf.or.ke/?view=gallery</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>
