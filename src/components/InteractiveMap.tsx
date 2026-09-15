@@ -1,42 +1,59 @@
-import React, { useState } from 'react';
-import { MapPin, Trees, ArrowRight } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowRight, RotateCcw, Flame } from 'lucide-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface CountyData {
+  id: string;
   name: string;
   projects: string;
   trees: string;
-  x: number;
-  y: number;
+  lat: number;
+  lng: number;
+  radiusKm: number;
+  description: string;
 }
 
 const COUNTIES: CountyData[] = [
   {
+    id: 'makueni',
     name: 'Makueni',
     projects: 'Forest Canopy Restoration',
     trees: '10,000+',
-    x: 250,
-    y: 375,
+    lat: -1.80,
+    lng: 37.62,
+    radiusKm: 35,
+    description: 'Community nurseries cultivating indigenous hardwoods and dryland canopy corridors.',
   },
   {
+    id: 'kajiado',
     name: 'Kajiado',
     projects: 'Eco-Village Housing Scheme',
     trees: '2,200+',
-    x: 195,
-    y: 380,
+    lat: -2.09,
+    lng: 36.78,
+    radiusKm: 32,
+    description: 'Solar microgrids, rainwater storage, and pastoral perimeter windbreaks.',
   },
   {
+    id: 'kitui',
     name: 'Kitui',
     projects: 'River Basin Conservation Drive',
     trees: '5,000+',
-    x: 290,
-    y: 310,
+    lat: -1.37,
+    lng: 38.01,
+    radiusKm: 40,
+    description: 'Seasonal riverbed protection, sand dam conservation, and dryland micro-forests.',
   },
   {
+    id: 'machakos',
     name: 'Machakos',
     projects: 'Grassland Agroforestry Corridor',
-    trees: '220',
-    x: 220,
-    y: 315,
+    trees: '4,300+',
+    lat: -1.52,
+    lng: 37.26,
+    radiusKm: 28,
+    description: 'Agroforestry belts intercropped with drought-hardy legumes and fruit orchards.',
   },
 ];
 
@@ -45,193 +62,175 @@ interface InteractiveMapProps {
 }
 
 export const InteractiveMap: React.FC<InteractiveMapProps> = ({ onSelectCounty }) => {
-  const [activeCounty, setActiveCounty] = useState<CountyData | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const [selectedCounty, setSelectedCounty] = useState<string | null>(null);
 
-  const handleCountyClick = (countyName: string) => {
+  useEffect(() => {
+    if (!mapContainerRef.current || mapInstanceRef.current) return;
+
+    // Initialize authentic Leaflet map centered on Kenya's active ecosystem belt
+    const map = L.map(mapContainerRef.current, {
+      center: [-1.6, 37.5],
+      zoom: 7.5,
+      minZoom: 6,
+      maxZoom: 13,
+      zoomControl: false,
+      scrollWheelZoom: false,
+    });
+
+    // Add CartoDB Clean Voyager High-Resolution Map Tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Zoom controls at top-right
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    // Nairobi landmark label
+    const nairobiIcon = L.divIcon({
+      className: 'nairobi-marker',
+      html: `
+        <div style="display:flex;align-items:center;gap:5px;background:rgba(30,70,32,0.92);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;font-family:sans-serif;box-shadow:0 2px 6px rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.4);white-space:nowrap;">
+          <div style="width:6px;height:6px;border-radius:50%;background:#FFD700;"></div>
+          <span>Nairobi</span>
+        </div>
+      `,
+      iconSize: [65, 24],
+      iconAnchor: [15, 12],
+    });
+    L.marker([-1.2921, 36.8219], { icon: nairobiIcon, interactive: false }).addTo(map);
+
+    // Add Heatmap Layers & County Nodes
+    COUNTIES.forEach((county) => {
+      // 1. Outer dispersion heat ring
+      L.circle([county.lat, county.lng], {
+        radius: county.radiusKm * 1000,
+        color: '#FF6B35',
+        fillColor: '#FF6B35',
+        fillOpacity: 0.18,
+        weight: 1.5,
+        dashArray: '4, 6',
+      }).addTo(map);
+
+      // 2. Middle intense heat layer
+      L.circle([county.lat, county.lng], {
+        radius: (county.radiusKm * 0.55) * 1000,
+        color: '#FFB13D',
+        fillColor: '#FFB13D',
+        fillOpacity: 0.4,
+        weight: 0,
+      }).addTo(map);
+
+      // 3. Central pulsing thermal marker
+      const pinIcon = L.divIcon({
+        className: 'gssf-heatmap-node',
+        html: `
+          <div style="position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <div style="position:absolute;width:100%;height:100%;border-radius:50%;background:#FF6B35;opacity:0.65;animation:ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+            <div style="position:relative;width:16px;height:16px;border-radius:50%;background:#1E4620;border:3px solid #FFFFFF;box-shadow:0 3px 10px rgba(0,0,0,0.35);"></div>
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+
+      const marker = L.marker([county.lat, county.lng], { icon: pinIcon }).addTo(map);
+
+      // Interactive popup
+      marker.bindPopup(`
+        <div style="font-family:sans-serif;padding:6px;min-width:200px;text-align:left;">
+          <div style="font-size:10px;font-weight:bold;color:#997D2F;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">
+            ${county.name} County
+          </div>
+          <div style="font-size:14px;font-weight:bold;color:#1E4620;margin-bottom:4px;">
+            ${county.projects}
+          </div>
+          <div style="font-size:11px;color:#555;margin-bottom:10px;line-height:1.4;">
+            ${county.description}
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding-top:8px;">
+            <span style="font-size:11px;font-weight:bold;color:#3B5A2B;">🌱 ${county.trees} Trees</span>
+            <span style="font-size:10px;font-weight:bold;color:#997D2F;text-transform:uppercase;">View Schemes &rarr;</span>
+          </div>
+        </div>
+      `);
+
+      marker.on('click', () => {
+        handleCountySelection(county.name, county.lat, county.lng);
+      });
+    });
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, []);
+
+  const handleCountySelection = (countyName: string, lat?: number, lng?: number) => {
+    setSelectedCounty(countyName);
     onSelectCounty(countyName);
+
+    if (mapInstanceRef.current && lat !== undefined && lng !== undefined) {
+      mapInstanceRef.current.flyTo([lat, lng], 9.2, { duration: 1.2 });
+    }
+
     const element = document.getElementById('impact-grid');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
+  const handleResetView = () => {
+    setSelectedCounty(null);
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo([-1.6, 37.5], 7.5, { duration: 1 });
+    }
+  };
+
   return (
     <div className="bg-white border border-brand-cream/65 rounded-3xl p-6 md:p-10 shadow-sm flex flex-col lg:flex-row items-center gap-12 mb-16">
       
-      {/* Map Content Column */}
-      <div className="w-full lg:w-[45%] relative flex justify-center bg-brand-cream/15 rounded-3xl p-6 border border-brand-cream/40 overflow-hidden">
+      {/* Real Interactive Map Container Column */}
+      <div className="w-full lg:w-[48%] relative flex flex-col justify-center bg-brand-cream/15 rounded-3xl p-3 border border-brand-cream/40">
         
-        {/* SVG Kenya Silhouette Map */}
-        <svg
-          viewBox="0 0 500 500"
-          className="w-full max-w-[390px] h-auto transition-all duration-300"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            {/* Soft Shadow for Map Outline */}
-            <filter id="map-shadow" x="-10%" y="-10%" width="130%" height="130%">
-              <feDropShadow dx="3" dy="6" stdDeviation="5" floodColor="#1E4620" floodOpacity="0.06" />
-            </filter>
-            
-            {/* Heatmap Radial Gradient */}
-            <radialGradient id="heatmap-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#FF6B35" stopOpacity="0.95" />
-              <stop offset="25%" stopColor="#FFB13D" stopOpacity="0.7" />
-              <stop offset="65%" stopColor="#3B5A2B" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#3B5A2B" stopOpacity="0" />
-            </radialGradient>
-          </defs>
+        {/* Live Leaflet Map Element */}
+        <div 
+          ref={mapContainerRef} 
+          className="w-full h-[380px] sm:h-[440px] rounded-2xl overflow-hidden shadow-inner z-0"
+        />
 
-          {/* Background Map: Outlying Kenya Shape */}
-          <path
-            d="M 190 40 L 385 40 L 385 110 L 435 240 L 360 380 L 325 435 L 290 445 L 265 445 L 205 435 L 180 405 L 155 405 L 115 340 L 125 285 L 105 245 L 125 185 L 155 125 Z"
-            fill="#F2F4F0"
-            stroke="#D3DDD0"
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-            filter="url(#map-shadow)"
-          />
-
-          {/* ==================== COUNTY BORDER PATHS (REAL ADM LINES) ==================== */}
-
-          {/* Kajiado County (Southwest border wedge) */}
-          <path
-            d="M 175 338 L 220 338 L 225 385 L 230 405 L 205 435 L 180 405 L 155 405 Z"
-            fill="#E5EFE2"
-            stroke="#BDCDB9"
-            strokeWidth="1.5"
-            className="transition-colors duration-300 hover:fill-brand-green/10"
-          />
-
-          {/* Makueni County (Elongated vertical county south of Machakos) */}
-          <path
-            d="M 220 338 L 255 338 L 285 380 L 280 405 L 230 405 L 225 385 Z"
-            fill="#E5EFE2"
-            stroke="#BDCDB9"
-            strokeWidth="1.5"
-            className="transition-colors duration-300 hover:fill-brand-green/10"
-          />
-
-          {/* Machakos County (Central-South, north of Kajiado/Makueni) */}
-          <path
-            d="M 175 338 L 220 338 L 255 338 L 250 288 L 195 293 Z"
-            fill="#E5EFE2"
-            stroke="#BDCDB9"
-            strokeWidth="1.5"
-            className="transition-colors duration-300 hover:fill-brand-green/10"
-          />
-
-          {/* Kitui County (Massive vertical east wedge) */}
-          <path
-            d="M 255 338 L 285 380 L 335 340 L 320 250 L 250 288 Z"
-            fill="#E5EFE2"
-            stroke="#BDCDB9"
-            strokeWidth="1.5"
-            className="transition-colors duration-300 hover:fill-brand-green/10"
-          />
-
-          {/* Rest of Kenya gridlines for authentic map look */}
-          <path
-            d="M 125 185 L 195 293 M 155 125 L 250 288 M 190 40 L 250 288 M 385 110 L 320 250 M 435 240 L 335 340"
-            stroke="#D3DDD0"
-            strokeWidth="1"
-            strokeDasharray="2 3"
-          />
-
-          {/* Lake Victoria Accent on West */}
-          <path
-            d="M 115 330 C 110 325, 105 328, 103 333 C 101 338, 105 345, 110 348 C 115 350, 120 345, 118 338 Z"
-            fill="#C9D6E4"
-            stroke="#A3B4C5"
-            strokeWidth="1"
-          />
-          <text x="70" y="342" fill="#8796A5" className="text-[9px] font-sans font-bold select-none opacity-85">
-            L. Victoria
-          </text>
-
-          {/* Nairobi Capital Landmark */}
-          <g transform="translate(210, 310)" className="opacity-85 select-none">
-            <circle cx="0" cy="0" r="3" className="fill-slate-600" />
-            <text x="8" y="3" fill="#697565" className="text-[9px] font-sans font-bold">Nairobi</text>
-          </g>
-
-          {/* ==================== HEATMAP RIPPLE EFFECTS ==================== */}
-          {COUNTIES.map((county) => (
-            <g
-              key={county.name}
-              className="cursor-pointer"
-              onMouseEnter={() => setActiveCounty(county)}
-              onMouseLeave={() => setActiveCounty(null)}
-              onClick={() => handleCountyClick(county.name)}
-            >
-              {/* Outer heat dispersion wave */}
-              <circle
-                cx={county.x}
-                cy={county.y}
-                r="45"
-                fill="url(#heatmap-glow)"
-                className="opacity-45 animate-pulse"
-                style={{ transformOrigin: `${county.x}px ${county.y}px` }}
-              />
-
-              {/* Middle intense heat circle */}
-              <circle
-                cx={county.x}
-                cy={county.y}
-                r="25"
-                fill="url(#heatmap-glow)"
-                className="opacity-80 transition-transform duration-500 transform group-hover:scale-110"
-              />
-
-              {/* Hot core node */}
-              <circle
-                cx={county.x}
-                cy={county.y}
-                r="5.5"
-                className="fill-white stroke-brand-gold stroke-[2.5] shadow-md"
-              />
-            </g>
-          ))}
-        </svg>
-
-        {/* Floating Glassmorphic Tooltip overlay */}
-        {activeCounty && (
-          <div
-            className="absolute z-20 bg-brand-dark/95 backdrop-blur-md text-white p-4 rounded-2xl shadow-xl border border-white/15 w-[230px] transition-all duration-300 font-sans pointer-events-none"
-            style={{
-              left: `${(activeCounty.x / 500) * 100}%`,
-              top: `${(activeCounty.y / 500) * 100 - 32}%`,
-              transform: 'translate(-50%, -100%)',
-            }}
-          >
-            {/* Speech bubble pointer */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-brand-dark/95"></div>
-            
-            <div className="space-y-2.5 text-left">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-brand-gold uppercase tracking-widest">
-                <MapPin className="w-3.5 h-3.5" />
-                <span>{activeCounty.name} County</span>
-              </div>
-              <h4 className="text-sm font-serif font-bold text-white leading-snug line-clamp-1">{activeCounty.projects}</h4>
-              
-              <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                <div className="flex items-center gap-1 text-brand-cream opacity-90 text-xs">
-                  <Trees className="w-4 h-4 text-brand-gold" />
-                  <span>{activeCounty.trees} Trees</span>
-                </div>
-                <div className="flex items-center gap-0.5 text-brand-gold font-bold text-[9px] uppercase tracking-wider">
-                  <span>View Details</span>
-                  <ArrowRight className="w-3 h-3" />
-                </div>
-              </div>
+        {/* Heatmap Legend & Reset Map Controls Overlay */}
+        <div className="flex items-center justify-between mt-3 px-2">
+          {/* Heatmap Legend */}
+          <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-brand-cream/80 px-3 py-1.5 rounded-xl shadow-xs text-xs font-sans">
+            <Flame className="w-3.5 h-3.5 text-[#FF6B35]" />
+            <span className="text-slate-500 font-semibold">Heatmap Activity:</span>
+            <div className="flex items-center gap-1.5 font-bold">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#FF6B35]"></span>
+              <span className="text-[10px] text-slate-700">Reforestation Densities</span>
             </div>
           </div>
-        )}
+
+          {/* Reset Map View Button */}
+          <button
+            onClick={handleResetView}
+            className="flex items-center gap-1.5 bg-white/90 hover:bg-brand-green hover:text-white backdrop-blur-sm border border-brand-cream/80 px-3 py-1.5 rounded-xl shadow-xs text-xs font-sans font-semibold text-slate-700 transition-colors"
+            title="Reset Map View"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span>Reset View</span>
+          </button>
+        </div>
+
       </div>
 
       {/* Info Column */}
-      <div className="w-full lg:w-[55%] space-y-6 text-left">
+      <div className="w-full lg:w-[52%] space-y-6 text-left">
         <div className="inline-block px-3 py-1 rounded-full bg-brand-green/10 text-brand-green font-bold text-xs uppercase tracking-widest font-sans">
           Geographic Footprint
         </div>
@@ -239,30 +238,37 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({ onSelectCounty }
           Where GSSF is Restoring Ecosystems
         </h3>
         <p className="text-slate-500 font-sans text-sm sm:text-md leading-relaxed">
-          GSSF targets key dryland regions and ecological catchments in Kenya. Our localized models engage directly with communities on the ground, creating resilient agroforestry corridors and rebuilding forest canopies.
+          Explore real geographic terrain and satellite data across Kenya. GSSF targets key dryland regions and ecological catchments, engaging directly with local communities to establish resilient agroforestry corridors and rebuild forest canopies.
         </p>
         
-        {/* County cards grid - Styled beautifully */}
+        {/* County cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          {COUNTIES.map((county) => (
-            <button
-              key={county.name}
-              onClick={() => handleCountyClick(county.name)}
-              className="flex items-center justify-between p-4 rounded-2xl border border-brand-cream bg-brand-cream/5 hover:bg-brand-green hover:text-white hover:border-brand-green hover:shadow-md hover:shadow-brand-green/10 transition-all duration-300 text-left font-sans group"
-            >
-              <div className="space-y-1">
-                <span className="block text-xs font-bold text-brand-gold uppercase tracking-wider group-hover:text-brand-cream">
-                  {county.name} County
-                </span>
-                <span className="text-sm font-serif font-bold text-brand-dark group-hover:text-white block">
-                  {county.trees} Trees
-                </span>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-brand-green/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                <ArrowRight className="w-4 h-4 text-brand-green group-hover:text-white transform group-hover:translate-x-1 transition-transform" />
-              </div>
-            </button>
-          ))}
+          {COUNTIES.map((county) => {
+            const isSelected = selectedCounty === county.name;
+            return (
+              <button
+                key={county.name}
+                onClick={() => handleCountySelection(county.name, county.lat, county.lng)}
+                className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 text-left font-sans group ${
+                  isSelected
+                    ? 'bg-brand-green text-white border-brand-green shadow-md shadow-brand-green/20'
+                    : 'border-brand-cream bg-brand-cream/5 hover:bg-brand-green hover:text-white hover:border-brand-green hover:shadow-md hover:shadow-brand-green/10'
+                }`}
+              >
+                <div className="space-y-1">
+                  <span className={`block text-xs font-bold uppercase tracking-wider ${isSelected ? 'text-brand-cream' : 'text-brand-gold group-hover:text-brand-cream'}`}>
+                    {county.name} County
+                  </span>
+                  <span className={`text-sm font-serif font-bold block ${isSelected ? 'text-white' : 'text-brand-dark group-hover:text-white'}`}>
+                    {county.trees} Trees
+                  </span>
+                </div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isSelected ? 'bg-white/20 text-white' : 'bg-brand-green/5 group-hover:bg-white/10 text-brand-green group-hover:text-white'}`}>
+                  <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
